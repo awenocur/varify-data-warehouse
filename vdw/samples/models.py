@@ -319,7 +319,8 @@ class Result(TimestampedModel):
     sample = models.ForeignKey(Sample, related_name='results')
 
     # Reference to the unique variant this result is about
-    variant = models.ForeignKey(Variant)
+    allele_1 = models.ForeignKey(Variant)
+    allele_2 = models.ForeignKey(Variant)
 
     # Genome Analysis Toolkit (GATK) VCF fields
     quality = models.FloatField(null=True, blank=True, db_index=True)
@@ -333,8 +334,8 @@ class Result(TimestampedModel):
     genotype_quality = models.FloatField(null=True, blank=True)
 
     # Depth of coverage per allele
-    coverage_ref = models.IntegerField(null=True, blank=True)
-    coverage_alt = models.IntegerField(null=True, blank=True)
+    coverage_1 = models.IntegerField(null=True, blank=True)
+    coverage_2 = models.IntegerField(null=True, blank=True)
 
     phred_scaled_likelihood = models.TextField(null=True, blank=True)
 
@@ -363,7 +364,6 @@ class Result(TimestampedModel):
     @property
     def genotype_value(self):
         if self.genotype:
-            genotype = self.genotype.value
             variant = self.variant
             if genotype in ('1/1', '1/2'):
                 return variant.alt + '/' + variant.alt
