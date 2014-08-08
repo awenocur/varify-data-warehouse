@@ -319,8 +319,8 @@ class Result(TimestampedModel):
     sample = models.ForeignKey(Sample, related_name='results')
 
     # Reference to the unique variant this result is about
-    allele_1 = models.ForeignKey(Variant)
-    allele_2 = models.ForeignKey(Variant)
+    allele_1 = models.ForeignKey(Variant, db_column='allele_1_id')
+    allele_2 = models.ForeignKey(Variant, db_column='allele_2_id', related_name='results')
 
     # Genome Analysis Toolkit (GATK) VCF fields
     quality = models.FloatField(null=True, blank=True, db_index=True)
@@ -359,7 +359,7 @@ class Result(TimestampedModel):
 
     class Meta(object):
         db_table = 'sample_result'
-        unique_together = ('sample', 'variant')
+        unique_together = ('sample', 'allele_1', 'allele_2')
 
     @property
     def genotype_value(self):
