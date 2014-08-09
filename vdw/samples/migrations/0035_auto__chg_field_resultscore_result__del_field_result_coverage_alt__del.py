@@ -193,7 +193,7 @@ class Migration(SchemaMigration):
         },
         'samples.result': {
             'Meta': {'unique_together': "(('sample', 'allele_1', 'allele_2'),)", 'object_name': 'Result', 'db_table': "'sample_result'"},
-            'allele_1': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['variants.Variant']", 'null': 'True', 'db_column': "'allele_1_id'"}),
+            'allele_1': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['variants.Variant']", 'db_column': "'allele_1_id'"}),
             'allele_2': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'results'", 'null': 'True', 'db_column': "'allele_2_id'", 'to': "orm['variants.Variant']"}),
             'base_counts': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'baseq_rank_sum': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
