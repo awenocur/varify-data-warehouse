@@ -362,6 +362,28 @@ class Result(TimestampedModel):
         db_table = 'sample_result'
         unique_together = ('sample', 'allele_1', 'allele_2')
 
+    # The following returns ref allelic depth if it is available:
+    @property
+    def coverage_ref(self):
+        if self.genotype and self.genotype.value in\
+                ('0/0', '0/1', '0/2', '0/#'):
+            return self.coverage_1
+
+    # The following is an accessor for legacy support; a new one should
+    # return a tuple with zero to two entries.
+    @property
+    def coverage_alt(self):
+        if self.genotype and self.genotype.value != '0/0':
+            return self.coverage_2
+
+    # The following is an accessor for legacy support; a new one should
+    # return a tuple with zero to two entries.  The rationale behind this
+    # implementation is that the prior model didn't even reference more info
+    # than this
+    @property
+    def variant(self):
+        return self.allele_1
+
     @property
     def genotype_value(self):
         if self.genotype:
