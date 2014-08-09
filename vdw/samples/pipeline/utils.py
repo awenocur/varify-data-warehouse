@@ -21,10 +21,11 @@ class ResultStream(VCFPGCopyEditor):
                       'spanning_deletions', 'mq', 'mq0', 'baseq_rank_sum',
                       'mq_rank_sum', 'read_pos_rank_sum', 'strand_bias',
                       'homopolymer_run', 'haplotype_score', 'quality_by_depth',
-                      'fisher_strand', 'base_counts', 'variant_id',
-                      'sample_id', 'read_depth', 'quality', 'genotype_id',
-                      'genotype_quality', 'coverage_ref', 'coverage_alt',
-                      'phred_scaled_likelihood', 'created', 'modified')
+                      'fisher_strand', 'base_counts', 'allele_1_id',
+                      'allele_2_id', 'sample_id', 'read_depth', 'quality',
+                      'genotype_id', 'genotype_quality', 'coverage_1',
+                      'coverage_2', 'phred_scaled_likelihood', 'created',
+                      'modified')
 
     def __init__(self, *args, **kwargs):
         self.sample_id = kwargs.pop('sample_id')
@@ -45,22 +46,12 @@ class ResultStream(VCFPGCopyEditor):
         # Calculate the MD5 of the variant itself (not the record)
         md5 = calculate_md5(record)
 
-        # Ensure the variant exists
-        variant_id = self.variants.get(md5)
-        assert variant_id is not None
-
         cleaned = super(ResultStream, self).process_line(record)
         # Remove variant specific parts
         cleaned = cleaned[4:]
 
         # can these be indexed?
         call = record.genotype(self.vcf_sample)
-
-        # Already seen this variant for this sample, otherwise we would get a
-        # duplicate key value violation in sample_result.
-        if Result.objects.filter(
-                variant=variant_id, sample=self.sample_id).exists():
-            return None
 
         # The possibility for multiple alleles in these wide vcfs is almost
         # infinite so we need to triage the really weird ones into having a
@@ -90,8 +81,18 @@ class ResultStream(VCFPGCopyEditor):
         if pl:
             pl = ','.join([str(x) for x in pl])
 
+        # Ensure the variant exists
+        variant_id = self.variants.get(md5)
+        assert variant_id is not None
+
+        # Already seen this variant for this sample, otherwise we would get a
+        # duplicate key value violation in sample_result.
+        if Result.objects.filter(
+                allele_1=variant_id, sample=self.sample_id).exists():
+            return None
+
         # Append remaining columns
-        other = [variant_id, self.sample_id, dp, record.QUAL, keyed_geno, gq,
+        other = [variant_id, variant_id, self.sample_id, dp, record.QUAL, keyed_geno, gq,
                  ad0, ad1, pl, self.now, self.now]
 
         cleaned.extend([self.process_column('', x) for x in other])

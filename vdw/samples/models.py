@@ -250,12 +250,13 @@ class Cohort(ObjectSet):
                         ) WHERE "id" = %s
                     ''', [self.id])
 
+                    # TODO: update this to take into account het alt results!
                     # Calculate frequencies for all variants associated with
                     # all samples in this cohort
                     cursor.execute('''
                         INSERT INTO cohort_variant (cohort_id, variant_id, af)
                         (
-                            SELECT c.id, r.variant_id,
+                            SELECT c.id, r.allele_1_id,
                                 COUNT(r.id) / c."count"::float
                             FROM sample_result r
                                 INNER JOIN sample s ON (r.sample_id = s.id)
@@ -263,7 +264,7 @@ class Cohort(ObjectSet):
                                     (cs.sample_id = s.id)
                                 INNER JOIN cohort c ON (cs.cohort_id = c.id)
                             WHERE c.id = %s
-                            GROUP BY c.id, r.variant_id, c."count"
+                            GROUP BY c.id, r.allele_1_id, c."count"
                         )
                     ''', [self.id])
                     transaction.commit()

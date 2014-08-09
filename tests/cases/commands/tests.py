@@ -185,7 +185,7 @@ class BigAutoFieldsTestCase(TestCase):
 
         new_result = Result.objects.create(
             id=two_hundred_billion, sample_id=new_sample.id,
-            variant_id=new_variant.id)
+            allele_1_id=new_variant.id)
 
         ResultScore.objects.create(
             id=1, result_id=new_result.id, rank=0, score=0)
