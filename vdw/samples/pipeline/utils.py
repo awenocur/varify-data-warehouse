@@ -92,7 +92,8 @@ class ResultStream(VCFPGCopyEditor):
             return None
 
         # Append remaining columns
-        other = [variant_id, variant_id, self.sample_id, dp, record.QUAL, keyed_geno, gq,
+        other = [variant_id, variant_id, self.sample_id, dp, record.QUAL,
+                 keyed_geno, gq,
                  ad0, ad1, pl, self.now, self.now]
 
         cleaned.extend([self.process_column('', x) for x in other])

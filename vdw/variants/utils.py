@@ -10,7 +10,7 @@ def calculate_md5(*args, **kwargs):
         alt_value = kwargs['alt_value']
     if 'alt_index' in kwargs:
         alt_index = kwargs['alt_index']
-    assert(alt_value == None or alt_index == None)
+    assert(alt_value is None or alt_index is None)
     if len(args) == 1 and isinstance(args[0], _Record):
         r = args[0]
         if not alt_value:
