@@ -8,9 +8,6 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Alter unique constraint to include 'allele', fields
-        db.delete_unique('sample_result', ['sample_id', 'variant_id'])
-        db.create_unique('sample_result', ['sample_id', 'allele_1_id', 'allele_2_id'])
 
         # Renaming field 'Result.coverage_ref'
         db.rename_column('sample_result', 'coverage_ref', 'coverage_1')
@@ -26,10 +23,14 @@ class Migration(SchemaMigration):
                       self.gf('django.db.models.fields.related.ForeignKey')(related_name='results', null=True, db_column='allele_2_id', to=orm['variants.Variant']),
                       keep_default=False)
 
+        # Alter unique constraint to include 'allele', fields
+        db.delete_unique('sample_result', ['sample_id', 'allele_1_id'])
+        db.create_unique('sample_result', ['sample_id', 'allele_1_id', 'allele_2_id'])
+
     def backwards(self, orm):
         # Removing unique constraint on 'Result', fields ['sample', 'allele_1', 'allele_2']
         db.delete_unique('sample_result', ['sample_id', 'allele_1_id', 'allele_2_id'])
-        db.create_unique('sample_result', ['sample_id', 'variant_id'])
+        db.create_unique('sample_result', ['sample_id', 'allele_1_id'])
 
         # Renaming field 'Result.coverage_1'
         db.rename_column('sample_result', 'coverage_1', 'coverage_ref')
