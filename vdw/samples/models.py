@@ -319,7 +319,7 @@ class Result(TimestampedModel):
     sample = models.ForeignKey(Sample, related_name='results')
 
     # Reference to the unique variant this result is about
-    allele_1 = models.ForeignKey(Variant, db_column='allele_1_id', null=True)
+    allele_1 = models.ForeignKey(Variant, db_column='allele_1_id')
     allele_2 = models.ForeignKey(Variant, db_column='allele_2_id', null=True,
                                  related_name='results')
 
@@ -365,13 +365,18 @@ class Result(TimestampedModel):
     @property
     def genotype_value(self):
         if self.genotype:
-            variant = self.variant
-            if genotype in ('1/1', '1/2'):
-                return variant.alt + '/' + variant.alt
+            genotype = self.genotype.value
+            allele_1 = self.allele_1
+            allele_2 = self.allele_2
+            if genotype == '1/1':
+                return allele_1.alt + '/' + allele_1.alt
+            elif genotype == '1/2':
+                return allele_1.alt + '/' + (allele_2.alt if allele_2 else
+                                             allele_1.alt)
             elif genotype == '0/1':
-                return variant.ref + '/' + variant.alt
+                return allele_1.ref + '/' + allele_1.alt
             elif genotype == '0/0':
-                return variant.ref + '/' + variant.alt
+                return allele_1.ref + '/' + allele_1.ref
 
     @property
     def base_count_map(self):
