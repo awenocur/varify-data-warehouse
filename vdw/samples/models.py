@@ -395,7 +395,7 @@ class Result(TimestampedModel):
                 return allele_1.alt + '/' + allele_1.alt
             elif genotype == '1/2':
                 return allele_1.alt + '/' +\
-                       (allele_2.alt if allele_2 else allele_1.alt)
+                    (allele_2.alt if allele_2 else allele_1.alt)
             elif genotype == '0/1':
                 return allele_1.ref + '/' + allele_1.alt
             elif genotype == '0/0':
