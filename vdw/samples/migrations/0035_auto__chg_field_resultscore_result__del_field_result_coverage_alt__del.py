@@ -8,7 +8,6 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-
         # Renaming field 'Result.coverage_ref'
         db.rename_column('sample_result', 'coverage_ref', 'coverage_1')
 

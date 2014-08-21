@@ -10,9 +10,13 @@ def calculate_md5(*args, **kwargs):
         alt_value = kwargs['alt_value']
     if 'alt_index' in kwargs:
         alt_index = kwargs['alt_index']
-    assert(alt_value is None or alt_index is None)
+    if alt_value and alt_index:
+        raise ValueError("Both alt_value and alt_index were supplied when "
+                         "calculating a hash.  The alternate allele should "
+                         "be identified using only one of these methods.")
     if len(args) == 1 and isinstance(args[0], _Record):
         r = args[0]
+
         if not alt_value:
             if alt_index:
                 alt_value = r.ALT[alt_index]

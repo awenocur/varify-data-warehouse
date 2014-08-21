@@ -81,9 +81,12 @@ class ResultStream(VCFPGCopyEditor):
         if pl:
             pl = ','.join([str(x) for x in pl])
 
-        # Ensure the variant exists
+        # Ensure the variant exists.
         variant_id = self.variants.get(md5)
-        assert variant_id is not None
+        if variant_id is None:
+            log.debug("missing Variant in cache when processing line for "
+                      "ResultStream")
+            raise ValueError("missing Variant in cache")
 
         # Already seen this variant for this sample, otherwise we would get a
         # duplicate key value violation in sample_result.
