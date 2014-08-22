@@ -7,13 +7,31 @@ from django.db import models
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        "Write your forwards methods here."
-        # Note: Don't use "from appname.models import ModelName".
-        # Use orm.ModelName to refer to models in this application,
-        # and orm['appname.ModelName'] for models in other applications.
+        all_results = orm.Result.objects.all()
+        for result in all_results:
+            if result.genotype.label == '#/#' or\
+                result.genotype.label == '1/1' or\
+                result.genotype.label == '1/2' or\
+                result.genotype.label == '2/2#':
+                    # Reference is absent; use only the second "allele". It may
+                    # be a comma-delimited list of ref alleles at this point.
+                    variant_to_dissect = result.allele_2
+                    result.allele_2 = None
+                    alleles = variant_to_dissect.alt.split(',')
+            else:
+                    result.allele_2 = None
 
+                    result.allele_1 = result.allele_2
+                    result.allele_2 = None
+                    result.save()
+
+    # Due to the nature of the reverse schema migration (occurring after this
+    # some data loss may be inevitable.
     def backwards(self, orm):
-        "Write your backwards methods here."
+        # This method should generate clusters of Variant and Result objects.
+        # Use one array for every Variant that is a member, one array for every
+        # Result that is a member.  The Results can be
+        # TODO: complete implementation here (Yes, I know it won't be merged in this way)
 
     models = {
         'auth.group': {
