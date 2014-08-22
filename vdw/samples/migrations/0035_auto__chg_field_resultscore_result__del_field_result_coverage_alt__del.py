@@ -233,6 +233,26 @@ class Migration(SchemaMigration):
             'result': ('vdw.core.models.BigForeignKey', [], {'related_name': "'score'", 'unique': 'True', 'to': "orm['samples.Result']"}),
             'score': ('django.db.models.fields.FloatField', [], {})
         },
+        'samples.resultset': {
+            'Meta': {'unique_together': "(('sample', 'name'),)", 'object_name': 'ResultSet', 'db_table': "'result_set'"},
+            'count': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
+            'results': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['samples.Result']", 'through': "orm['samples.ResultSetItem']", 'symmetrical': 'False'}),
+            'sample': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'result_sets'", 'to': "orm['samples.Sample']"}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+        },
+        'samples.resultsetitem': {
+            'Meta': {'unique_together': "(('result', 'set'),)", 'object_name': 'ResultSetItem', 'db_table': "'result_set_item'"},
+            'added': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'removed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'result': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['samples.Result']"}),
+            'set': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['samples.ResultSet']"})
+        },
         'samples.sample': {
             'Meta': {'ordering': "('project', 'batch', 'label')", 'unique_together': "(('batch', 'name', 'version'),)", 'object_name': 'Sample', 'db_table': "'sample'"},
             'batch': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'samples'", 'to': "orm['samples.Batch']"}),
