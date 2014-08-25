@@ -24,8 +24,7 @@ class ResultStream(VCFPGCopyEditor):
                       'fisher_strand', 'base_counts', 'allele_1_id',
                       'allele_2_id', 'sample_id', 'read_depth', 'quality',
                       'genotype_id', 'genotype_quality', 'coverage_1',
-                      'coverage_2', 'phred_scaled_likelihood', 'created',
-                      'modified')
+                      'phred_scaled_likelihood', 'created', 'modified')
 
     def __init__(self, *args, **kwargs):
         self.sample_id = kwargs.pop('sample_id')
@@ -95,7 +94,7 @@ class ResultStream(VCFPGCopyEditor):
             return None
 
         # Append remaining columns
-        other = [variant_id, variant_id, self.sample_id, dp, record.QUAL,
+        other = [variant_id, self.sample_id, dp, record.QUAL,
                  keyed_geno, gq,
                  ad0, ad1, pl, self.now, self.now]
 
