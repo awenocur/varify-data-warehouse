@@ -22,8 +22,8 @@ class ResultStream(VCFPGCopyEditor):
                       'mq_rank_sum', 'read_pos_rank_sum', 'strand_bias',
                       'homopolymer_run', 'haplotype_score', 'quality_by_depth',
                       'fisher_strand', 'base_counts', 'allele_1_id',
-                      'allele_2_id', 'sample_id', 'read_depth', 'quality',
-                      'genotype_id', 'genotype_quality', 'coverage_1',
+                      'sample_id', 'read_depth', 'quality', 'genotype_id',
+                      'genotype_quality', 'coverage_1', 'coverage_2',
                       'phred_scaled_likelihood', 'created', 'modified')
 
     def __init__(self, *args, **kwargs):
