@@ -250,12 +250,13 @@ class Cohort(ObjectSet):
                         ) WHERE "id" = %s
                     ''', [self.id])
 
+                    # TODO: update this to take into account het alt results!
                     # Calculate frequencies for all variants associated with
                     # all samples in this cohort
                     cursor.execute('''
                         INSERT INTO cohort_variant (cohort_id, variant_id, af)
                         (
-                            SELECT c.id, r.variant_id,
+                            SELECT c.id, r.allele_1_id,
                                 COUNT(r.id) / c."count"::float
                             FROM sample_result r
                                 INNER JOIN sample s ON (r.sample_id = s.id)
@@ -263,7 +264,7 @@ class Cohort(ObjectSet):
                                     (cs.sample_id = s.id)
                                 INNER JOIN cohort c ON (cs.cohort_id = c.id)
                             WHERE c.id = %s
-                            GROUP BY c.id, r.variant_id, c."count"
+                            GROUP BY c.id, r.allele_1_id, c."count"
                         )
                     ''', [self.id])
                     transaction.commit()
@@ -318,8 +319,12 @@ class Result(TimestampedModel):
     # Reference to the sample
     sample = models.ForeignKey(Sample, related_name='results')
 
-    # Reference to the unique variant this result is about
-    variant = models.ForeignKey(Variant)
+    # References to the alleles this result is referencing
+    allele_1 = models.ForeignKey(Variant, db_column='allele_1_id')
+    # The related_name here is unused.  Django requires this be defined to
+    # avoid a namespace collision.
+    allele_2 = models.ForeignKey(Variant, db_column='allele_2_id', null=True,
+                                 related_name='results')
 
     # Genome Analysis Toolkit (GATK) VCF fields
     quality = models.FloatField(null=True, blank=True, db_index=True)
@@ -333,8 +338,8 @@ class Result(TimestampedModel):
     genotype_quality = models.FloatField(null=True, blank=True)
 
     # Depth of coverage per allele
-    coverage_ref = models.IntegerField(null=True, blank=True)
-    coverage_alt = models.IntegerField(null=True, blank=True)
+    coverage_1 = models.IntegerField(null=True, blank=True)
+    coverage_2 = models.IntegerField(null=True, blank=True)
 
     phred_scaled_likelihood = models.TextField(null=True, blank=True)
 
@@ -358,19 +363,43 @@ class Result(TimestampedModel):
 
     class Meta(object):
         db_table = 'sample_result'
-        unique_together = ('sample', 'variant')
+        unique_together = ('sample', 'allele_1', 'allele_2')
+
+    # The following returns ref allelic depth if it is available.
+    @property
+    def coverage_ref(self):
+        if self.genotype and self.genotype.value in\
+                ('0/0', '0/1', '0/2', '0/#'):
+            return self.coverage_1
+
+    # The following is an accessor for legacy support.
+    @property
+    def coverage_alt(self):
+        if self.genotype and self.genotype.value != '0/0':
+            return self.coverage_2
+
+    # The following is an accessor for legacy support.  The rationale behind
+    # this implementation is that the prior model didn't even reference more
+    # info than this.
+    @property
+    def variant(self):
+        return self.allele_1
 
     @property
     def genotype_value(self):
         if self.genotype:
             genotype = self.genotype.value
-            variant = self.variant
-            if genotype in ('1/1', '1/2'):
-                return variant.alt + '/' + variant.alt
+            allele_1 = self.allele_1
+            allele_2 = self.allele_2
+            if genotype == '1/1':
+                return allele_1.alt + '/' + allele_1.alt
+            elif genotype == '1/2':
+                return allele_1.alt + '/' +\
+                    (allele_2.alt if allele_2 else allele_1.alt)
             elif genotype == '0/1':
-                return variant.ref + '/' + variant.alt
+                return allele_1.ref + '/' + allele_1.alt
             elif genotype == '0/0':
-                return variant.ref + '/' + variant.alt
+                return allele_1.ref + '/' + allele_1.ref
 
     @property
     def base_count_map(self):
