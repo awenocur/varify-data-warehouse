@@ -143,7 +143,9 @@ class Command(BaseCommand):
 
             # Compute the unique gene list for the entire sample
             genes = set(sample.results.values_list(
-                'variant__effects__transcript__gene__symbol', flat=True))
+                'allele_1__effects__transcript__gene__symbol', flat=True))
+            genes = genes.union(set(sample.results.values_list(
+                'allele_2__effects__transcript__gene__symbol', flat=True)))
 
             # Obviously, if there are no genes then the gene ranking endpoint
             # will have nothing to do so we can safely skip this sample.
